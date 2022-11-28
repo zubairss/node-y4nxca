@@ -16,7 +16,29 @@ const auth = {
       },
       garage5: {
         one: 'sds'
-      }
+      },
+      garage4: {
+        one: 'sds'
+      },
+      garage3: {
+        one: 'sds'
+      },
+      garage2: {
+        one: 'sds'
+      },
+      garage: {
+        one: 'sds'
+      },
+      prior: {
+        city: "sdsds",
+        postalCode: "sdsds",
+        streetName: "sdsds",
+        houseNumber: 1223,
+        one: "dsds"
+      },
+      // mailing: {
+      //   one: 'sds'
+      // },
     },
     vehicles: [],
   },
@@ -413,24 +435,27 @@ const authSchema = Joi.object()
           ),
         })
       }).custom((value, helper) => {
+        // console.log(value);
         const keys = helper.schema.$_terms.keys;
         keys.map((key) => {
           if (key.schema.type === 'object') {
             if (!value[key.key]) {
-              // helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
+              helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
             }
           } else if (key.schema.type === 'array') {
-
+            if (!(value[key.key]) || value[key.key].length === 0) {
+              helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
+            }
           } else {
             if (!value[key.key]) {
               const k = key.schema._flags.label;
-              // helper.warn('any.unknown', { msg: 'Value Required', k: k })
+              helper.warn('any.unknown', { msg: 'Value Required', k: k })
             }
           }
         })
       }, "Warn on undefined keys"),
     }).custom((value, helper) => {
-      console.log(value);
+      // console.log(value);
       const keys = helper.schema.$_terms.keys;
       keys.map((key) => {
         if (key.schema.type === 'object') {
@@ -439,12 +464,12 @@ const authSchema = Joi.object()
           }
         } else if (key.schema.type === 'array') {
           if (!(value[key.key]) || value[key.key].length === 0) {
-            helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
+            // helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
           }
         } else {
           if (!value[key.key]) {
             const k = key.schema._flags.label;
-            helper.warn('any.unknown', { msg: 'Value Required', k: k })
+            // helper.warn('any.unknown', { msg: 'Value Required', k: k })
           }
         }
       })
