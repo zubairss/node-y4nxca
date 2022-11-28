@@ -16,6 +16,9 @@ const auth = {
         streetName: "sdsds",
         houseNumber: 1223,
         one: "dsds"
+      },
+      garage5: {
+        one: 'sds'
       }
     }
   },
@@ -410,39 +413,64 @@ const authSchema = Joi.object()
           monthsAt: Joi.number().label(
             'InputMessage.data.Quote.Risk.addresses.garage5.monthsAt',
           ),
-        }),
-      }),
+        }).custom((value, helper) => {
+          const keys = helper.schema.$_terms.keys;
+          keys.map((key) => {
+            if (key.schema.type === 'object') {
+
+            } else if (key.schema.type === 'array') {
+
+            } else {
+              if (!value[key.key]) {
+                const label = key.schema._flags.label;
+                // helper.warn('any.unknown', { msg: 'Value Required', k: label })
+              }
+            }
+          })
+        }, "Warn on undefined keys"),
+      }).custom((value, helper) => {
+        const keys = helper.schema.$_terms.keys;
+        keys.map((key) => {
+          if (key.schema.type === 'object') {
+            if (!value[key.key]) {
+              helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
+            }
+          } else if (key.schema.type === 'array') {
+
+          } else {
+            if (!value[key.key]) {
+              const k = key.schema._flags.label;
+              helper.warn('any.unknown', { msg: 'Value Required', k: k })
+            }
+          }
+        })
+      }, "Warn on undefined keys"),
     }),
   })
   .options({
     abortEarly: false,
     allowUnknown: false,
-  }).custom((value, helper) => {
-    function checkIndexObj(obj, is, value) {
-      if (typeof is == 'string')
-        return checkIndexObj(obj, is.split('.'), value);
-      else if (is.length == 1 && value !== undefined)
-        return obj[is[0]] = value;
-      else if (is.length == 0)
-        return obj;
-      else
-        return checkIndexObj(obj[is[0]], is.slice(1), value);
-    }
-
-    const keys = ['InputMessage.addresses.current.postalsCode', 'InputMessage.addresses.current.houseNumber', 'InputMessage.addresses.current.streetName']
-    const undefinedKeys = []
-    keys.map((key) => {
-      if (!checkIndexObj(value, key)) {
-        undefinedKeys.push(key);
-      }
-    })
-    if (undefinedKeys.length > 0) {
-      helper.warn('any.unknown', { msg: 'Values Required', value: undefinedKeys });
-    }
-  }, "Warn on undefined keys");
+  })
+// .custom((value, helper) => {
+//   function checkIndexObj(obj, is, value) {
+//     if (typeof is == 'string')
+//       return checkIndexObj(obj, is.split('.'), value);
+//     else if (is.length == 1 && value !== undefined)
+//       return obj[is[0]] = value;
+//     else if (is.length == 0)
+//       return obj;
+//     else
+//       return checkIndexObj(obj[is[0]], is.slice(1), value);
+//   }
+// }, "Warn on undefined keys");
 
 
 const { value, error, warning } = authSchema.validate(auth);
 console.log("error", error);
-// console.log("warning", warning.details[0].context);
-console.log("warning", warning['details'][0]['context']);
+// console.log("warning", warning);
+// console.log("warning", warning['details'][8]['context']);
+if (warning) {
+  warning.details.map((detail) => {
+    console.log(detail.context);
+  })
+}
