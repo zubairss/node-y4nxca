@@ -1,6 +1,28 @@
 const { string, any, func } = require('joi');
 const Joi = require('joi');
 
+
+const warnUndefined = (value, helper) => {
+  // console.log(value);
+  const keys = helper.schema.$_terms.keys;
+  keys.map((key) => {
+    if (key.schema.type === 'object') {
+      if (!value[key.key]) {
+        helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
+      }
+    } else if (key.schema.type === 'array') {
+      if (!(value[key.key]) || value[key.key].length === 0) {
+        helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
+      }
+    } else {
+      if (!value[key.key]) {
+        const k = key.schema._flags.label;
+        helper.warn('any.unknown', { msg: 'Value Required', k: k })
+      }
+    }
+  })
+};
+
 //This is the object we will be getting from DB/Client
 const auth = {
   InputMessage: {
@@ -40,7 +62,7 @@ const auth = {
       //   one: 'sds'
       // },
     },
-    vehicles: [],
+    vehicles: [{ vin: 'sds' }],
   },
   // AnotherField: 'sd' 
 };
@@ -96,7 +118,9 @@ const authSchema = Joi.object()
             'InputMessage.data.Quote.Risk.vehicles.additionalInterestIndex',
           ),
         }),
-      ),
+      ).custom((value, helper) => {
+        console.log(value);
+      }),
       addresses: Joi.object().keys({
         current: Joi.object().keys({
           one: Joi.string()
@@ -144,7 +168,7 @@ const authSchema = Joi.object()
           monthsAt: Joi.number().label(
             'InputMessage.data.Quote.Risk.addresses.current.monthsAt',
           ),
-        }),
+        }).custom(warnUndefined, "Warn on undefined keys"),
         prior: Joi.object().keys({
           one: Joi.string().label(
             'InputMessage.data.Quote.Risk.addresses.prior.one',
@@ -187,7 +211,7 @@ const authSchema = Joi.object()
           monthsAt: Joi.number().label(
             'InputMessage.data.Quote.Risk.addresses.prior.monthsAt',
           ),
-        }),
+        }).custom(warnUndefined, "Warn on undefined keys"),
         mailing: Joi.object().keys({
           one: Joi.string().label(
             'InputMessage.data.Quote.Risk.addresses.mailing.one',
@@ -228,7 +252,7 @@ const authSchema = Joi.object()
           monthsAt: Joi.number().label(
             'InputMessage.data.Quote.Risk.addresses.mailing.monthsAt',
           ),
-        }),
+        }).custom(warnUndefined, "Warn on undefined keys"),
         garage: Joi.object().keys({
           one: Joi.string().label(
             'InputMessage.data.Quote.Risk.addresses.garage.one',
@@ -269,7 +293,7 @@ const authSchema = Joi.object()
           monthsAt: Joi.number().label(
             'InputMessage.data.Quote.Risk.addresses.garage.monthsAt',
           ),
-        }),
+        }).custom(warnUndefined, "Warn on undefined keys"),
         garage2: Joi.object().keys({
           one: Joi.string().label(
             'InputMessage.data.Quote.Risk.addresses.garage2.one',
@@ -310,7 +334,7 @@ const authSchema = Joi.object()
           monthsAt: Joi.number().label(
             'InputMessage.data.Quote.Risk.addresses.garage2.monthsAt',
           ),
-        }),
+        }).custom(warnUndefined, "Warn on undefined keys"),
         garage3: Joi.object().keys({
           one: Joi.string().label(
             'InputMessage.data.Quote.Risk.addresses.garage3.one',
@@ -351,7 +375,7 @@ const authSchema = Joi.object()
           monthsAt: Joi.number().label(
             'InputMessage.data.Quote.Risk.addresses.garage3.monthsAt',
           ),
-        }),
+        }).custom(warnUndefined, "Warn on undefined keys"),
         garage4: Joi.object().keys({
           one: Joi.string().label(
             'InputMessage.data.Quote.Risk.addresses.garage4.one',
@@ -392,7 +416,7 @@ const authSchema = Joi.object()
           monthsAt: Joi.number().label(
             'InputMessage.data.Quote.Risk.addresses.garage4.monthsAt',
           ),
-        }),
+        }).custom(warnUndefined, "Warn on undefined keys"),
         garage5: Joi.object().keys({
           one: Joi.string().label(
             'InputMessage.data.Quote.Risk.addresses.garage5.one',
@@ -433,52 +457,14 @@ const authSchema = Joi.object()
           monthsAt: Joi.number().label(
             'InputMessage.data.Quote.Risk.addresses.garage5.monthsAt',
           ),
-        })
-      }).custom((value, helper) => {
-        // console.log(value);
-        const keys = helper.schema.$_terms.keys;
-        keys.map((key) => {
-          if (key.schema.type === 'object') {
-            if (!value[key.key]) {
-              helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
-            }
-          } else if (key.schema.type === 'array') {
-            if (!(value[key.key]) || value[key.key].length === 0) {
-              helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
-            }
-          } else {
-            if (!value[key.key]) {
-              const k = key.schema._flags.label;
-              helper.warn('any.unknown', { msg: 'Value Required', k: k })
-            }
-          }
-        })
-      }, "Warn on undefined keys"),
-    }).custom((value, helper) => {
-      // console.log(value);
-      const keys = helper.schema.$_terms.keys;
-      keys.map((key) => {
-        if (key.schema.type === 'object') {
-          if (!value[key.key]) {
-            helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
-          }
-        } else if (key.schema.type === 'array') {
-          if (!(value[key.key]) || value[key.key].length === 0) {
-            // helper.warn('any.unknown', { msg: 'Value Required', k: key.key })
-          }
-        } else {
-          if (!value[key.key]) {
-            const k = key.schema._flags.label;
-            // helper.warn('any.unknown', { msg: 'Value Required', k: k })
-          }
-        }
-      })
-    }, "Warn on undefined keys"),
+        }).custom(warnUndefined, "Warn on undefined keys"),
+      }).custom(warnUndefined, "Warn on undefined keys"),
+    }).custom(warnUndefined, "Warn on undefined keys"),
   })
   .options({
     abortEarly: false,
     allowUnknown: false,
-  })
+  }).custom(warnUndefined, "Warn on undefined keys")
 // .custom((value, helper) => {
 //   function checkIndexObj(obj, is, value) {
 //     if (typeof is == 'string')
